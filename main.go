@@ -118,5 +118,20 @@ func main() {
 	widget.Layout().AddWidget(buttonShowLog)
 	widget.Layout().AddWidget(logTextWidget)
 	window.Show()
+
+	//systray
+	sys := widgets.NewQSystemTrayIcon(nil)
+	sys.SetIcon(widget.Style().StandardIcon(widgets.QStyle__SP_MessageBoxCritical, nil, nil))
+	sys.ConnectActivated(func(reason widgets.QSystemTrayIcon__ActivationReason) {
+		if reason == widgets.QSystemTrayIcon__Trigger {
+			widget.Show()
+		}
+	})
+	menu := widgets.NewQMenu(nil)
+	exit := menu.AddAction("Exit")
+	exit.ConnectTriggered(func(bool) { app.Exit(0) })
+	sys.SetContextMenu(menu)
+	sys.Show()
+
 	app.Exec()
 }
