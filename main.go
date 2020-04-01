@@ -2,10 +2,8 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"os"
-	"os/exec"
-	"strings"
+	"yiwenlong/launchduidemo/tools"
 
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
@@ -34,36 +32,6 @@ type LaunchdApp struct {
 	systemTray		*SystemTray
 }
 
-func (la *LaunchdApp) asyncLog(reader io.ReadCloser) error {
-	cache := ""
-	buf := make([]byte, 1024)
-	for {
-		num, err := reader.Read(buf)
-		if err != nil && err != io.EOF {
-			return err
-		}
-		if num > 0 {
-			b := buf[:num]
-			s := strings.Split(string(b), "\n")
-			line := strings.Join(s[:len(s)-1], "\n")
-			la.mainWindow.loggerWidget.Append(fmt.Sprintf("%s%s", cache, line))
-			cache = s[len(s)-1]
-		}
-	}
-	return nil
-}
-
-func (la *LaunchdApp) execShell(script string) error {
-	cmd := exec.Command("/bin/bash", "-c", script)
-	stderr, _ := cmd.StderrPipe()
-	stdout, _ := cmd.StdoutPipe()
-	cmd.Start()
-	go la.asyncLog(stderr)
-	go la.asyncLog(stdout)
-	err := cmd.Wait()
-	return err
-}
-
 func (la *LaunchdApp) showDialog(s string, widget *widgets.QWidget) {
 	messageBox := widgets.NewQMessageBox2(widgets.QMessageBox__NoIcon, "Notification", s, widgets.QMessageBox__Ok, widget, core.Qt__WindowTitleHint)
 	messageBox.Show()
@@ -77,7 +45,15 @@ func (la *LaunchdApp) startServer() error {
 	dir := la.appDir()
 	dir.Cd("../../")
 	startScript := dir.AbsoluteFilePath("start.sh")
-	go la.execShell(fmt.Sprintf("%s %s", startScript, dir.AbsolutePath()))
+	script := fmt.Sprintf("%s %s", startScript, dir.AbsolutePath())
+	tools.ExecShell(script, func(s string, b bool) {
+		if b {
+			la.systemTray.show()
+			la.showDialog("Server started!", la.mainWindow.centralWidget)
+		} else {
+			la.mainWindow.loggerWidget.Append(s)
+		}
+	})
 	return nil
 }
 
@@ -85,8 +61,15 @@ func (la *LaunchdApp) stopServer() error {
 	dir := la.appDir()
 	dir.Cd("../../")
 	stopScript := dir.AbsoluteFilePath("stop.sh")
-
-	go la.execShell(fmt.Sprintf("%s %s", stopScript, dir.AbsolutePath()))
+	script := fmt.Sprintf("%s %s", stopScript, dir.AbsolutePath())
+	tools.ExecShell(script, func(s string, b bool) {
+		if b {
+			la.systemTray.close()
+			la.showDialog("Server closed!", la.mainWindow.centralWidget)
+		} else {
+			la.mainWindow.loggerWidget.Append(s)
+		}
+	})
 	return nil
 }
 
@@ -102,10 +85,6 @@ func (la *LaunchdApp) showServerLog() {
 	textBrowser.SetWindowTitle(logFile.FileName())
 	textBrowser.SetText(file.Data())
 	textBrowser.Show()
-}
-
-func (la *LaunchdApp) launch() {
-
 }
 
 func (m *MainWindow) setUp() {
@@ -208,9 +187,8 @@ func (la *LaunchdApp) setUp() {
 	la.systemTray.setUp()
 }
 
-func (la *LaunchdApp) show() {
+func (la *LaunchdApp) launch() {
 	la.setUp()
-	la.systemTray.show()
 	la.mainWindow.show()
 	la.application.Exec()
 }
@@ -221,5 +199,5 @@ func (la *LaunchdApp) exit() {
 
 func main() {
 	launchdApp := LaunchdApp{}
-	launchdApp.show()
+	launchdApp.launch()
 }
