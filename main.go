@@ -19,6 +19,8 @@ type MainWindow struct {
 	btnStart 		*widgets.QPushButton
 	btnClose 		*widgets.QPushButton
 	btnShowLog 		*widgets.QPushButton
+	btnShowTray		*widgets.QPushButton
+	btnCloseTray	*widgets.QPushButton
 }
 
 type SystemTray struct {
@@ -141,6 +143,18 @@ func (m *MainWindow) setUp() {
 	})
 	m.centralWidget.Layout().AddWidget(m.btnShowLog)
 
+	m.btnShowTray = widgets.NewQPushButton2("show system tray", nil)
+	m.btnShowTray.ConnectClicked(func(bool) {
+		m.lapp.systemTray.show()
+	})
+	m.centralWidget.Layout().AddWidget(m.btnShowTray)
+
+	m.btnCloseTray = widgets.NewQPushButton2("dismiss system tray", nil)
+	m.btnCloseTray.ConnectClicked(func(bool) {
+		m.lapp.systemTray.close()
+	})
+	m.centralWidget.Layout().AddWidget(m.btnCloseTray)
+
 	m.centralWidget.Layout().AddWidget(m.loggerWidget)
 }
 
@@ -173,6 +187,13 @@ func (s *SystemTray) show() {
 		return
 	}
 	s.mSystemTrayIcon.Show()
+}
+
+func (s *SystemTray) close() {
+	if s.mSystemTrayIcon == nil {
+		return
+	}
+	s.mSystemTrayIcon.SetVisible(false)
 }
 
 func (la *LaunchdApp) setUp() {
