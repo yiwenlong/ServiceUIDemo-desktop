@@ -11,7 +11,28 @@ import (
 	"github.com/therecipe/qt/widgets"
 )
 
-func asyncLog(reader io.ReadCloser, logger *widgets.QTextEdit) error {
+type MainWindow struct {
+	lapp			*LaunchdApp
+	mWindow 		*widgets.QMainWindow
+	loggerWidget 	*widgets.QTextEdit
+	centralWidget 	*widgets.QWidget
+	btnStart 		*widgets.QPushButton
+	btnClose 		*widgets.QPushButton
+	btnShowLog 		*widgets.QPushButton
+}
+
+type SystemTray struct {
+	lapp			*LaunchdApp
+	mSystemTrayIcon	*widgets.QSystemTrayIcon
+}
+
+type LaunchdApp struct {
+	application 	*widgets.QApplication
+	mainWindow 		*MainWindow
+	systemTray		*SystemTray
+}
+
+func (la *LaunchdApp) asyncLog(reader io.ReadCloser) error {
 	cache := ""
 	buf := make([]byte, 1024)
 	for {
@@ -23,51 +44,52 @@ func asyncLog(reader io.ReadCloser, logger *widgets.QTextEdit) error {
 			b := buf[:num]
 			s := strings.Split(string(b), "\n")
 			line := strings.Join(s[:len(s)-1], "\n")
-			logger.Append(fmt.Sprintf("%s%s", cache, line))
+			la.mainWindow.loggerWidget.Append(fmt.Sprintf("%s%s", cache, line))
 			cache = s[len(s)-1]
 		}
 	}
 	return nil
 }
 
-func execShell(logger *widgets.QTextEdit, script string) error {
+func (la *LaunchdApp) execShell(script string) error {
 	cmd := exec.Command("/bin/bash", "-c", script)
 	stderr, _ := cmd.StderrPipe()
 	stdout, _ := cmd.StdoutPipe()
 	cmd.Start()
-	go asyncLog(stderr, logger)
-	go asyncLog(stdout, logger)
+	go la.asyncLog(stderr)
+	go la.asyncLog(stdout)
 	err := cmd.Wait()
 	return err
 }
 
-func show(s string, widget *widgets.QWidget) {
+func (la *LaunchdApp) showDialog(s string, widget *widgets.QWidget) {
 	messageBox := widgets.NewQMessageBox2(widgets.QMessageBox__NoIcon, "Notification", s, widgets.QMessageBox__Ok, widget, core.Qt__WindowTitleHint)
 	messageBox.Show()
 }
 
-func startServer(app *widgets.QApplication, logger *widgets.QTextEdit) error {
-	appDirPath := app.ApplicationDirPath()
-	dir2 := core.NewQDir2(appDirPath)
-	dir2.Cd("../../")
-	startScript := dir2.AbsoluteFilePath("start.sh")
-	go execShell(logger, fmt.Sprintf("%s %s", startScript, dir2.AbsolutePath()))
+func (la *LaunchdApp) appDir() *core.QDir {
+	return core.NewQDir2(la.application.ApplicationDirPath())
+}
+
+func (la *LaunchdApp) startServer() error {
+	dir := la.appDir()
+	dir.Cd("../../")
+	startScript := dir.AbsoluteFilePath("start.sh")
+	go la.execShell(fmt.Sprintf("%s %s", startScript, dir.AbsolutePath()))
 	return nil
 }
 
-func stopServer(app *widgets.QApplication, logger *widgets.QTextEdit) error {
-	appDirPath := app.ApplicationDirPath()
-	dir2 := core.NewQDir2(appDirPath)
-	dir2.Cd("../../")
-	stopScript := dir2.AbsoluteFilePath("stop.sh")
+func (la *LaunchdApp) stopServer() error {
+	dir := la.appDir()
+	dir.Cd("../../")
+	stopScript := dir.AbsoluteFilePath("stop.sh")
 
-	go execShell(logger, fmt.Sprintf("%s %s", stopScript, dir2.AbsolutePath()))
+	go la.execShell(fmt.Sprintf("%s %s", stopScript, dir.AbsolutePath()))
 	return nil
 }
 
-func showServerLog(app *widgets.QApplication) {
-	appDirPath := app.ApplicationDirPath()
-	homeDir := core.NewQDir2(appDirPath)
+func (la *LaunchdApp) showServerLog() {
+	homeDir := la.appDir()
 	homeDir.Cd("../../")
 	logFile := core.NewQFile2(homeDir.AbsoluteFilePath("error.log"))
 	logFile.Open(core.QIODevice__ReadOnly)
@@ -80,58 +102,103 @@ func showServerLog(app *widgets.QApplication) {
 	textBrowser.Show()
 }
 
-func main() {
-	app := widgets.NewQApplication(len(os.Args), os.Args)
+func (la *LaunchdApp) launch() {
 
-	window := widgets.NewQMainWindow(nil, 0)
-	window.SetMinimumSize2(800, 400)
-	window.SetWindowTitle("launchd demo")
+}
 
-	widget := widgets.NewQWidget(nil, 0)
-	widget.SetLayout(widgets.NewQVBoxLayout())
-	widget.Layout().QLayoutItem.SetAlignment(core.Qt__AlignLeft)
-	window.SetCentralWidget(widget)
+func (m *MainWindow) setUp() {
+	m.mWindow = widgets.NewQMainWindow(nil, 0)
+	m.mWindow.SetMinimumSize2(800, 400)
+	m.mWindow.SetWindowTitle("launchd demo")
 
-	logTextWidget := widgets.NewQTextEdit(nil)
-	logTextWidget.SetReadOnly(true)
+	m.centralWidget = widgets.NewQWidget(nil, 0)
+	m.centralWidget.SetLayout(widgets.NewQVBoxLayout())
+	m.centralWidget.Layout().QLayoutItem.SetAlignment(core.Qt__AlignLeft)
+	m.mWindow.SetCentralWidget(m.centralWidget)
 
-	buttonStart := widgets.NewQPushButton2("启动 launchd 测试服务", nil)
-	buttonStart.ConnectClicked(func(bool) {
-		if err := startServer(app, logTextWidget); err != nil {
-			show(err.Error(), widget)
+	m.loggerWidget = widgets.NewQTextEdit(nil)
+	m.loggerWidget.SetReadOnly(true)
+
+	m.btnStart = widgets.NewQPushButton2("start launchd test server", nil)
+	m.btnStart.ConnectClicked(func(bool) {
+		if err := m.lapp.startServer(); err != nil {
+			m.lapp.showDialog(err.Error(), m.centralWidget)
 		}
 	})
-	widget.Layout().AddWidget(buttonStart)
+	m.centralWidget.Layout().AddWidget(m.btnStart)
 
-	buttonClose := widgets.NewQPushButton2("close launchd test server", nil)
-	buttonClose.ConnectClicked(func(bool) {
-		if err := stopServer(app, logTextWidget); err != nil {
-			show(err.Error(), widget)
+	m.btnClose = widgets.NewQPushButton2("close launchd test server", nil)
+	m.btnClose.ConnectClicked(func(bool) {
+		if err := m.lapp.stopServer(); err != nil {
+			m.lapp.showDialog(err.Error(), m.centralWidget)
 		}
 	})
-	widget.Layout().AddWidget(buttonClose)
+	m.centralWidget.Layout().AddWidget(m.btnClose)
 
-	buttonShowLog := widgets.NewQPushButton2("view server log", nil)
-	buttonShowLog.ConnectClicked(func(bool) {
-		showServerLog(app)
+	m.btnShowLog = widgets.NewQPushButton2("view server log", nil)
+	m.btnShowLog.ConnectClicked(func(bool) {
+		m.lapp.showServerLog()
 	})
-	widget.Layout().AddWidget(buttonShowLog)
-	widget.Layout().AddWidget(logTextWidget)
-	window.Show()
+	m.centralWidget.Layout().AddWidget(m.btnShowLog)
 
-	//systray
-	sys := widgets.NewQSystemTrayIcon(nil)
-	sys.SetIcon(widget.Style().StandardIcon(widgets.QStyle__SP_MessageBoxCritical, nil, nil))
-	sys.ConnectActivated(func(reason widgets.QSystemTrayIcon__ActivationReason) {
-		if reason == widgets.QSystemTrayIcon__Trigger {
-			widget.Show()
-		}
-	})
+	m.centralWidget.Layout().AddWidget(m.loggerWidget)
+}
+
+func (m *MainWindow) show() {
+	if m.mWindow == nil {
+		m.setUp()
+	}
+	if m.mWindow.IsVisible() {
+		return
+	}
+	m.mWindow.Show()
+}
+
+func (s *SystemTray) setUp() {
+	s.mSystemTrayIcon = widgets.NewQSystemTrayIcon(nil)
+	s.mSystemTrayIcon.SetIcon(widgets.NewQCommonStyle().StandardIcon(widgets.QStyle__SP_MessageBoxCritical, nil, nil))
 	menu := widgets.NewQMenu(nil)
 	exit := menu.AddAction("Exit")
-	exit.ConnectTriggered(func(bool) { app.Exit(0) })
-	sys.SetContextMenu(menu)
-	sys.Show()
+	exit.ConnectTriggered(func(bool) {
+		s.lapp.exit()
+	})
+	s.mSystemTrayIcon.SetContextMenu(menu)
+}
 
-	app.Exec()
+func (s *SystemTray) show() {
+	if s.mSystemTrayIcon == nil {
+		s.setUp()
+	}
+	if s.mSystemTrayIcon.IsVisible() {
+		return
+	}
+	s.mSystemTrayIcon.Show()
+}
+
+func (la *LaunchdApp) setUp() {
+	la.application = widgets.NewQApplication(len(os.Args), os.Args)
+	la.mainWindow = &MainWindow{
+		lapp: la,
+	}
+	la.mainWindow.setUp()
+	la.systemTray = &SystemTray{
+		lapp: la,
+	}
+	la.systemTray.setUp()
+}
+
+func (la *LaunchdApp) show() {
+	la.setUp()
+	la.systemTray.show()
+	la.mainWindow.show()
+	la.application.Exec()
+}
+
+func (la *LaunchdApp) exit() {
+	la.application.Exit(0)
+}
+
+func main() {
+	launchdApp := LaunchdApp{}
+	launchdApp.show()
 }
