@@ -155,6 +155,10 @@ func (s *SystemTray) setUp() {
 	exit.ConnectTriggered(func(bool) {
 		s.lapp.exit()
 	})
+	show := menu.AddAction("Show")
+	show.ConnectTriggered(func(bool) {
+		s.lapp.mainWindow.show()
+	})
 	s.mSystemTrayIcon.SetContextMenu(menu)
 }
 
@@ -166,6 +170,7 @@ func (s *SystemTray) show() {
 		return
 	}
 	s.mSystemTrayIcon.Show()
+	s.lapp.application.SetQuitOnLastWindowClosed(false)
 }
 
 func (s *SystemTray) close() {
@@ -173,6 +178,7 @@ func (s *SystemTray) close() {
 		return
 	}
 	s.mSystemTrayIcon.SetVisible(false)
+	s.lapp.application.SetQuitOnLastWindowClosed(true)
 }
 
 func (la *LaunchdApp) setUp() {
