@@ -19,6 +19,7 @@ type MainWindow struct {
 	btnShowLog 		*widgets.QPushButton
 	btnShowTray		*widgets.QPushButton
 	btnCloseTray	*widgets.QPushButton
+	appleBtn		*widgets.QPushButton
 }
 
 type SystemTray struct {
@@ -116,7 +117,20 @@ func (m *MainWindow) setUp() {
 	})
 	m.centralWidget.Layout().AddWidget(m.btnClose)
 
-	m.btnShowLog = widgets.NewQPushButton2("view server log", nil)
+	m.appleBtn = widgets.NewQPushButton2("run a apple script", nil)
+	m.appleBtn.ConnectClicked(func(bool) {
+		script := "echo aaabbb >> /etc/hosts"
+		go tools.ExecShellAdmin(script, func(s string, b bool) {
+			if b {
+				m.lapp.showDialog("done", m.lapp.mainWindow.centralWidget)
+			} else {
+				m.lapp.mainWindow.loggerWidget.Append(s)
+			}
+		})
+	})
+	m.centralWidget.Layout().AddWidget(m.appleBtn)
+
+	m.btnShowLog = widgets.NewQPushButton2("show log", nil)
 	m.btnShowLog.ConnectClicked(func(bool) {
 		m.lapp.showServerLog()
 	})
@@ -183,6 +197,8 @@ func (s *SystemTray) close() {
 
 func (la *LaunchdApp) setUp() {
 	la.application = widgets.NewQApplication(len(os.Args), os.Args)
+	la.application.SetProperty("inAdminMode", core.NewQVariant9(true))
+
 	la.mainWindow = &MainWindow{
 		lapp: la,
 	}
