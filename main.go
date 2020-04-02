@@ -46,7 +46,7 @@ func (la *LaunchdApp) startServer() error {
 	dir.Cd("../../")
 	startScript := dir.AbsoluteFilePath("start.sh")
 	script := fmt.Sprintf("%s %s", startScript, dir.AbsolutePath())
-	tools.ExecShell(script, func(s string, b bool) {
+	go tools.ExecShell(script, func(s string, b bool) {
 		if b {
 			la.systemTray.show()
 			la.showDialog("Server started!", la.mainWindow.centralWidget)
@@ -62,7 +62,7 @@ func (la *LaunchdApp) stopServer() error {
 	dir.Cd("../../")
 	stopScript := dir.AbsoluteFilePath("stop.sh")
 	script := fmt.Sprintf("%s %s", stopScript, dir.AbsolutePath())
-	tools.ExecShell(script, func(s string, b bool) {
+	go tools.ExecShell(script, func(s string, b bool) {
 		if b {
 			la.systemTray.close()
 			la.showDialog("Server closed!", la.mainWindow.centralWidget)
