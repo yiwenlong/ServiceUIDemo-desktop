@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"yiwenlong/launchduidemo/tools"
@@ -52,6 +53,7 @@ func (la *LaunchdApp) startServer() error {
 		if state != nil {
 			if state.Success() {
 				la.systemTray.show()
+				la.LoadDaemon()
 			}
 		} else {
 			la.mainWindow.loggerWidget.Append(s)
@@ -69,6 +71,7 @@ func (la *LaunchdApp) stopServer() error {
 		if state != nil {
 			if state.Success() {
 				la.systemTray.close()
+				la.UnloadDaemon()
 			}
 		} else {
 			la.mainWindow.loggerWidget.Append(s)
@@ -213,9 +216,13 @@ func (la *LaunchdApp) setUp() {
 	la.systemTray.setUp()
 }
 
-func (la *LaunchdApp) launch() {
+func (la *LaunchdApp) launch(silence bool) {
 	la.setUp()
-	la.mainWindow.show()
+	if !silence {
+		la.mainWindow.show()
+	} else {
+		la.systemTray.show()
+	}
 	la.application.Exec()
 }
 
@@ -223,7 +230,54 @@ func (la *LaunchdApp) exit() {
 	la.application.Exit(0)
 }
 
+func (la *LaunchdApp) AppRootDir() *core.QDir{
+	dir := la.appDir()
+	dir.Cd("../../")
+	return dir
+}
+
+func (la *LaunchdApp) AppCommand() string {
+	dir := la.appDir()
+	dir.Cd("Contents/MacOS")
+	return dir.AbsoluteFilePath("launchduidemo")
+}
+
+func (la *LaunchdApp) LoadDaemon() {
+	script := la.AppRootDir().AbsoluteFilePath("daemon.sh")
+	script = fmt.Sprintf("%s load %s %s", script, la.AppCommand(), la.AppRootDir().AbsolutePath())
+	go tools.ExecShell(script, func(s string, state *os.ProcessState) {
+		if state == nil {
+			la.mainWindow.loggerWidget.Append(s)
+		} else {
+			if state.Success() {
+				la.mainWindow.loggerWidget.Append("Daemon process load success.")
+			} else {
+				la.mainWindow.loggerWidget.Append("Daemon process load failed.")
+			}
+		}
+	})
+}
+
+func (la *LaunchdApp) UnloadDaemon() {
+	script := la.AppRootDir().AbsoluteFilePath("daemon.sh")
+	script = fmt.Sprintf("%s unload", script)
+	go tools.ExecShell(script, func(s string, state *os.ProcessState) {
+		if state == nil {
+			la.mainWindow.loggerWidget.Append(s)
+		} else {
+			if state.Success() {
+				la.mainWindow.loggerWidget.Append("Daemon process unload success.")
+			} else {
+				la.mainWindow.loggerWidget.Append("Daemon process unload failed.")
+			}
+		}
+	})
+}
+
+var silence = flag.Bool("silence", false, "Just run system tray only.")
+
 func main() {
-	launchdApp := LaunchdApp{}
-	launchdApp.launch()
+	flag.Parse()
+	launchApp := LaunchdApp{}
+	launchApp.launch(*silence)
 }
