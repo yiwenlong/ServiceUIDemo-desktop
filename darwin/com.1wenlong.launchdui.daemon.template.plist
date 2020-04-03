@@ -11,9 +11,8 @@
         <string>com.1wenlong.launchdui</string>
         <key>ProgramArguments</key>
         <array>
+            <string>open</string>
             <string>launchdui.command.path</string>
-            <string>-silence</string>
-            <string>true</string>
         </array>
     </dict>
 </plist>

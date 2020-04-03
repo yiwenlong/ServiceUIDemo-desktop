@@ -11,7 +11,7 @@ function load() {
     exit 1
   fi
 
-  if [ ! -f "$binpath" ]; then
+  if [ ! -d "$binpath" ]; then
     echo "File not found: $binpath"
     exit 2
   fi

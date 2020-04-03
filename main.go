@@ -237,9 +237,8 @@ func (la *LaunchdApp) AppRootDir() *core.QDir{
 }
 
 func (la *LaunchdApp) AppCommand() string {
-	dir := la.appDir()
-	dir.Cd("Contents/MacOS")
-	return dir.AbsoluteFilePath("launchduidemo")
+	dir := la.AppRootDir()
+	return dir.AbsolutePath()
 }
 
 func (la *LaunchdApp) LoadDaemon() {
