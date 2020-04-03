@@ -3,6 +3,7 @@ package tools
 import (
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 )
 
@@ -24,18 +25,19 @@ func processOut(reader io.ReadCloser) chan string{
 	return out
 }
 
-func ExecShellAdmin(s string, outputProcessor func(string, bool)) {
+func ExecShellAdmin(s string, outputProcessor func(string, *os.ProcessState)) {
 	script := fmt.Sprintf("osascript -e \"do shell script \\\"%s\\\" with administrator privileges\"", s)
 	ExecShell(script, outputProcessor)
 }
 
-func ExecShell(s string, outputProcessor func(string, bool)) {
+func ExecShell(s string, outputProcessor func(string, *os.ProcessState)) {
 	cmd := exec.Command("/bin/bash", "-c", s + " 2>&1" )
 	out, _ := cmd.StdoutPipe()
 	ch := processOut(out)
 	cmd.Start()
 	for str := range ch {
-		outputProcessor(str, false)
+		outputProcessor(str, nil)
 	}
-	outputProcessor("", true)
+	cmd.Wait()
+	outputProcessor("", cmd.ProcessState)
 }

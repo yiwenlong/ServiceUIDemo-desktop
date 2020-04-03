@@ -44,13 +44,15 @@ func (la *LaunchdApp) appDir() *core.QDir {
 
 func (la *LaunchdApp) startServer() error {
 	dir := la.appDir()
+
 	dir.Cd("../../")
 	startScript := dir.AbsoluteFilePath("start.sh")
 	script := fmt.Sprintf("%s %s", startScript, dir.AbsolutePath())
-	go tools.ExecShell(script, func(s string, b bool) {
-		if b {
-			la.systemTray.show()
-			la.showDialog("Server started!", la.mainWindow.centralWidget)
+	go tools.ExecShell(script, func(s string, state *os.ProcessState) {
+		if state != nil {
+			if state.Success() {
+				la.systemTray.show()
+			}
 		} else {
 			la.mainWindow.loggerWidget.Append(s)
 		}
@@ -63,10 +65,11 @@ func (la *LaunchdApp) stopServer() error {
 	dir.Cd("../../")
 	stopScript := dir.AbsoluteFilePath("stop.sh")
 	script := fmt.Sprintf("%s %s", stopScript, dir.AbsolutePath())
-	go tools.ExecShell(script, func(s string, b bool) {
-		if b {
-			la.systemTray.close()
-			la.showDialog("Server closed!", la.mainWindow.centralWidget)
+	tools.ExecShell(script, func(s string, state *os.ProcessState) {
+		if state != nil {
+			if state.Success() {
+				la.systemTray.close()
+			}
 		} else {
 			la.mainWindow.loggerWidget.Append(s)
 		}
@@ -116,13 +119,14 @@ func (m *MainWindow) setUp() {
 		}
 	})
 	m.centralWidget.Layout().AddWidget(m.btnClose)
-
 	m.appleBtn = widgets.NewQPushButton2("run a apple script", nil)
 	m.appleBtn.ConnectClicked(func(bool) {
 		script := "echo aaabbb >> /etc/hosts"
-		go tools.ExecShellAdmin(script, func(s string, b bool) {
-			if b {
-				m.lapp.showDialog("done", m.lapp.mainWindow.centralWidget)
+		tools.ExecShellAdmin(script, func(s string, state *os.ProcessState) {
+			if state != nil {
+				if state.Success() {
+					m.lapp.mainWindow.loggerWidget.Append("state.Success: " + state.String())
+				}
 			} else {
 				m.lapp.mainWindow.loggerWidget.Append(s)
 			}
