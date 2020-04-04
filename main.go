@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/yiwenlong/launchduidemo/tools"
 	"os"
-	"yiwenlong/launchduidemo/tools"
 
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
