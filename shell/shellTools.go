@@ -3,6 +3,7 @@ package shell
 import (
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 )
 
@@ -52,4 +53,11 @@ func ExecShellAsync(s string, handler ShellHandler, token ShellToken) {
 	} else {
 		handler.HandleError(token, state.ExitCode(), state.String())
 	}
+}
+
+func ExecShell(s string) (*os.ProcessState, string)  {
+	cmd := exec.Command("/bin/bash", "-c", s + " 2>&1" )
+	out, _ := cmd.Output()
+	cmd.Run()
+	return cmd.ProcessState, string(out)
 }

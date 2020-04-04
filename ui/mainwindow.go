@@ -74,6 +74,13 @@ func (mw *MainWindow) HandleError(_ shell.ShellToken, _ int, state string)  {
 	mw.loggerWidget.Append("[ Shell exec error ]" + state)
 }
 
+func (mw *MainWindow) Launch() {
+	mw.Show()
+	if mw.servCtl.IsStarted() {
+		mw.app.LaunchSystemTray()
+	}
+}
+
 func (mw *MainWindow) Show()  {
 	mw.window.Show()
 }

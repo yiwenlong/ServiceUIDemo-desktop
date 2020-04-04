@@ -22,7 +22,7 @@ func NewApp() *LaunchdUIApp {
 }
 
 func (lapp *LaunchdUIApp) Launch()  {
-	lapp.mainWindow.Show()
+	lapp.mainWindow.Launch()
 	lapp.app.Exec()
 }
 

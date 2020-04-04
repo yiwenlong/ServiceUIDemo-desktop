@@ -47,3 +47,8 @@ func (sc *ServerController) Log() string {
 	logFile.Close()
 	return log.Data()
 }
+
+func (sc *ServerController) IsStarted () bool {
+	state, _ := shell.ExecShell("launchctl list | grep \"com.1wenlong.server\"")
+	return state.Success()
+}
