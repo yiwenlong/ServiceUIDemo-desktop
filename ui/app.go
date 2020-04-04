@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
 	"os"
 )
@@ -21,7 +22,7 @@ func NewApp() *LaunchdUIApp {
 }
 
 func (lapp *LaunchdUIApp) Launch()  {
-	lapp.systemTray.Launch()
+	lapp.mainWindow.Show()
 	lapp.app.Exec()
 }
 
@@ -29,9 +30,27 @@ func (lapp *LaunchdUIApp) Exit()  {
 	lapp.app.Exit(0)
 }
 
+func (lapp *LaunchdUIApp) AppDir() *core.QDir {
+	return core.NewQDir2(lapp.app.ApplicationDirPath())
+}
+
+func (lapp *LaunchdUIApp) AppRootDir() *core.QDir {
+	dir := lapp.AppDir()
+	dir.Cd("../../")
+	return dir
+}
+
 func (lapp *LaunchdUIApp) ShowMainWindow() {
 	if lapp.mainWindow == nil {
 		return
 	}
 	lapp.mainWindow.Show()
+}
+
+func (lapp *LaunchdUIApp) LaunchSystemTray() {
+	lapp.systemTray.Launch()
+}
+
+func (lapp *LaunchdUIApp) CloseSystemTray() {
+	lapp.systemTray.Close()
 }

@@ -3,9 +3,16 @@ package tools
 import (
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
 )
+
+type ShellToken int
+
+type ShellHandler interface{
+	HandleEcho(token ShellToken, echo string)
+	HandleError(token ShellToken, exitCode int, state string)
+	HandleSuccess(token ShellToken)
+}
 
 func processOut(reader io.ReadCloser) chan string{
 	out := make(chan string)
@@ -25,19 +32,24 @@ func processOut(reader io.ReadCloser) chan string{
 	return out
 }
 
-func ExecShellAdmin(s string, outputProcessor func(string, *os.ProcessState)) {
+func ExecShellAdmin(s string, handler ShellHandler, token ShellToken) {
 	script := fmt.Sprintf("osascript -e \"do shell script \\\"%s\\\" with administrator privileges\"", s)
-	ExecShell(script, outputProcessor)
+	ExecShell(script, handler, token)
 }
 
-func ExecShell(s string, outputProcessor func(string, *os.ProcessState)) {
+func ExecShell(s string, handler ShellHandler, token ShellToken) {
 	cmd := exec.Command("/bin/bash", "-c", s + " 2>&1" )
 	out, _ := cmd.StdoutPipe()
 	ch := processOut(out)
 	cmd.Start()
-	for str := range ch {
-		outputProcessor(str, nil)
+	for echo := range ch {
+		handler.HandleEcho(token, echo)
 	}
 	cmd.Wait()
-	outputProcessor("", cmd.ProcessState)
+	state := cmd.ProcessState
+	if state.Success() {
+		handler.HandleSuccess(token)
+	} else {
+		handler.HandleError(token, state.ExitCode(), state.String())
+	}
 }
