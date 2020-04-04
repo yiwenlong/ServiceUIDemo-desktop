@@ -3,7 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/therecipe/qt/core"
-	"github.com/yiwenlong/launchduidemo/tools"
+	"github.com/yiwenlong/launchduidemo/shell"
 )
 
 type ServerController struct {
@@ -13,7 +13,7 @@ type ServerController struct {
 }
 
 const (
-	Start tools.ShellToken = iota
+	Start shell.ShellToken = iota
 	Stop
 )
 
@@ -28,12 +28,12 @@ func NewServerController(serverHomeDir *core.QDir) *ServerController {
 	return  &sc
 }
 
-func (sc *ServerController) Start(handler tools.ShellHandler) {
-	tools.ExecShell(sc.startScript, handler, Start)
+func (sc *ServerController) Start(handler shell.ShellHandler) {
+	shell.ExecShellAsync(sc.startScript, handler, Start)
 }
 
-func (sc *ServerController) Stop(handler tools.ShellHandler) {
-	tools.ExecShell(sc.stopScript, handler, Stop)
+func (sc *ServerController) Stop(handler shell.ShellHandler) {
+	shell.ExecShellAsync(sc.stopScript, handler, Stop)
 }
 
 func (sc *ServerController) LogFile() *core.QFile {

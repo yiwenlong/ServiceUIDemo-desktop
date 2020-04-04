@@ -4,7 +4,7 @@ import (
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
 	"github.com/yiwenlong/launchduidemo/controller"
-	"github.com/yiwenlong/launchduidemo/tools"
+	"github.com/yiwenlong/launchduidemo/shell"
 )
 
 type MainWindow struct {
@@ -55,11 +55,11 @@ func (mw *MainWindow) init()  {
 	mw.centralWidget.Layout().AddWidget(mw.loggerWidget)
 }
 
-func (mw *MainWindow) HandleEcho(_ tools.ShellToken, echo string) {
+func (mw *MainWindow) HandleEcho(_ shell.ShellToken, echo string) {
 	mw.loggerWidget.Append(echo)
 }
 
-func (mw *MainWindow) HandleSuccess(token tools.ShellToken) {
+func (mw *MainWindow) HandleSuccess(token shell.ShellToken) {
 	switch token {
 	case controller.Start:
 		mw.app.app.SetQuitOnLastWindowClosed(false)
@@ -70,7 +70,7 @@ func (mw *MainWindow) HandleSuccess(token tools.ShellToken) {
 	}
 }
 
-func (mw *MainWindow) HandleError(_ tools.ShellToken, _ int, state string)  {
+func (mw *MainWindow) HandleError(_ shell.ShellToken, _ int, state string)  {
 	mw.loggerWidget.Append("[ Shell exec error ]" + state)
 }
 

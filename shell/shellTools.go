@@ -1,4 +1,4 @@
-package tools
+package shell
 
 import (
 	"fmt"
@@ -34,10 +34,10 @@ func processOut(reader io.ReadCloser) chan string{
 
 func ExecShellAdmin(s string, handler ShellHandler, token ShellToken) {
 	script := fmt.Sprintf("osascript -e \"do shell script \\\"%s\\\" with administrator privileges\"", s)
-	ExecShell(script, handler, token)
+	ExecShellAsync(script, handler, token)
 }
 
-func ExecShell(s string, handler ShellHandler, token ShellToken) {
+func ExecShellAsync(s string, handler ShellHandler, token ShellToken) {
 	cmd := exec.Command("/bin/bash", "-c", s + " 2>&1" )
 	out, _ := cmd.StdoutPipe()
 	ch := processOut(out)
