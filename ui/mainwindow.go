@@ -16,6 +16,13 @@ type MainWindow struct {
 	btnClose 		*widgets.QPushButton
 	btnShowLog 		*widgets.QPushButton
 	servCtl			*controller.ServerController
+	dialog 			*Dialog
+}
+
+type Dialog struct {
+	widgets.QMessageBox
+
+	_ func(message string)  `slot:"info"`
 }
 
 func NewMainWindow(app *LaunchdUIApp) *MainWindow {
@@ -28,6 +35,7 @@ func NewMainWindow(app *LaunchdUIApp) *MainWindow {
 		btnClose: 		widgets.NewQPushButton2("close launchd test server", nil),
 		btnShowLog: 	widgets.NewQPushButton2("show log", nil),
 		servCtl: 		controller.NewServerController(app.AppRootDir()),
+		dialog: 		NewDialog(nil),
 	}
 	window.init()
 	return &window
@@ -53,6 +61,10 @@ func (mw *MainWindow) init()  {
 
 	mw.loggerWidget.SetReadOnly(true)
 	mw.centralWidget.Layout().AddWidget(mw.loggerWidget)
+
+	mw.dialog.ConnectInfo(func(message string) {
+		mw.dialog.Information(nil, "Infomation", message, widgets.QMessageBox__Ok, widgets.QMessageBox__Default)
+	})
 }
 
 func (mw *MainWindow) HandleEcho(_ shell.ShellToken, echo string) {
@@ -64,9 +76,11 @@ func (mw *MainWindow) HandleSuccess(token shell.ShellToken) {
 	case controller.Start:
 		mw.app.app.SetQuitOnLastWindowClosed(false)
 		mw.app.LaunchSystemTray()
+		mw.dialog.Info("Service Started!")
 	case controller.Stop:
 		mw.app.app.SetQuitOnLastWindowClosed(true)
 		mw.app.CloseSystemTray()
+		mw.dialog.Info("Service Stop!")
 	}
 }
 
