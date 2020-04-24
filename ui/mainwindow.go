@@ -8,40 +8,40 @@ import (
 )
 
 type MainWindow struct {
-	app 			*LaunchdUIApp
-	window 			*widgets.QMainWindow
-	centralWidget 	*widgets.QWidget
-	loggerWidget 	*widgets.QTextEdit
-	btnStart 		*widgets.QPushButton
-	btnClose 		*widgets.QPushButton
-	btnShowLog 		*widgets.QPushButton
-	servCtl			*controller.ServerController
-	dialog 			*Dialog
+	app           *LaunchdUIApp
+	window        *widgets.QMainWindow
+	centralWidget *widgets.QWidget
+	loggerWidget  *widgets.QTextEdit
+	btnStart      *widgets.QPushButton
+	btnClose      *widgets.QPushButton
+	btnShowLog    *widgets.QPushButton
+	servCtl       *controller.ServerController
+	dialog        *Dialog
 }
 
 type Dialog struct {
 	widgets.QMessageBox
 
-	_ func(message string)  `slot:"info"`
+	_ func(message string) `slot:"info"`
 }
 
 func NewMainWindow(app *LaunchdUIApp) *MainWindow {
 	window := MainWindow{
-		app:			app,
-		window:			widgets.NewQMainWindow(nil, 0),
-		centralWidget: 	widgets.NewQWidget(nil, 0),
-		loggerWidget: 	widgets.NewQTextEdit(nil),
-		btnStart: 		widgets.NewQPushButton2("start launchd test server", nil),
-		btnClose: 		widgets.NewQPushButton2("close launchd test server", nil),
-		btnShowLog: 	widgets.NewQPushButton2("show log", nil),
-		servCtl: 		controller.NewServerController(app.AppRootDir()),
-		dialog: 		NewDialog(nil),
+		app:           app,
+		window:        widgets.NewQMainWindow(nil, 0),
+		centralWidget: widgets.NewQWidget(nil, 0),
+		loggerWidget:  widgets.NewQTextEdit(nil),
+		btnStart:      widgets.NewQPushButton2("start launchd test server", nil),
+		btnClose:      widgets.NewQPushButton2("close launchd test server", nil),
+		btnShowLog:    widgets.NewQPushButton2("show log", nil),
+		servCtl:       controller.NewServerController(app.AppRootDir()),
+		dialog:        NewDialog(nil),
 	}
 	window.init()
 	return &window
 }
 
-func (mw *MainWindow) init()  {
+func (mw *MainWindow) init() {
 	mw.window.SetMinimumSize2(800, 400)
 	mw.window.SetWindowTitle("launchd demo")
 
@@ -67,11 +67,11 @@ func (mw *MainWindow) init()  {
 	})
 }
 
-func (mw *MainWindow) HandleEcho(_ shell.ShellToken, echo string) {
+func (mw *MainWindow) HandleEcho(_ shell.SessionToken, echo string) {
 	mw.loggerWidget.Append(echo)
 }
 
-func (mw *MainWindow) HandleSuccess(token shell.ShellToken) {
+func (mw *MainWindow) HandleSuccess(token shell.SessionToken) {
 	switch token {
 	case controller.Start:
 		mw.app.app.SetQuitOnLastWindowClosed(false)
@@ -84,7 +84,7 @@ func (mw *MainWindow) HandleSuccess(token shell.ShellToken) {
 	}
 }
 
-func (mw *MainWindow) HandleError(_ shell.ShellToken, _ int, state string)  {
+func (mw *MainWindow) HandleError(_ shell.SessionToken, _ int, state string) {
 	mw.loggerWidget.Append("[ Shell exec error ]" + state)
 }
 
@@ -95,7 +95,7 @@ func (mw *MainWindow) Launch() {
 	}
 }
 
-func (mw *MainWindow) Show()  {
+func (mw *MainWindow) Show() {
 	mw.window.Show()
 }
 

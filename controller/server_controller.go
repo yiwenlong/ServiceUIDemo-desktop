@@ -7,32 +7,32 @@ import (
 )
 
 type ServerController struct {
-	homeDir 	*core.QDir
-	startScript	string
-	stopScript	string
+	homeDir     *core.QDir
+	startScript string
+	stopScript  string
 }
 
 const (
-	Start shell.ShellToken = iota
+	Start shell.SessionToken = iota
 	Stop
 )
 
 func NewServerController(serverHomeDir *core.QDir) *ServerController {
 	sc := ServerController{
-		homeDir:     serverHomeDir,
+		homeDir: serverHomeDir,
 	}
 	startSh := serverHomeDir.AbsoluteFilePath("start.sh")
 	sc.startScript = fmt.Sprintf("%s %s", startSh, serverHomeDir.AbsolutePath())
 	stopSh := serverHomeDir.AbsoluteFilePath("stop.sh")
 	sc.stopScript = fmt.Sprintf("%s %s", stopSh, serverHomeDir.AbsolutePath())
-	return  &sc
+	return &sc
 }
 
-func (sc *ServerController) Start(handler shell.ShellHandler) {
+func (sc *ServerController) Start(handler shell.CommandHandler) {
 	shell.ExecShellAsync(sc.startScript, handler, Start)
 }
 
-func (sc *ServerController) Stop(handler shell.ShellHandler) {
+func (sc *ServerController) Stop(handler shell.CommandHandler) {
 	shell.ExecShellAsync(sc.stopScript, handler, Stop)
 }
 
@@ -48,7 +48,7 @@ func (sc *ServerController) Log() string {
 	return log.Data()
 }
 
-func (sc *ServerController) IsStarted () bool {
+func (sc *ServerController) IsStarted() bool {
 	state, _ := shell.ExecShell("launchctl list | grep \"com.1wenlong.server\"")
 	return state.Success()
 }
