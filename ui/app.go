@@ -7,26 +7,26 @@ import (
 )
 
 type LaunchdUIApp struct {
-	app 		*widgets.QApplication
-	mainWindow 	*MainWindow
-	systemTray 	*SystemTray
+	app        *widgets.QApplication
+	mainWindow *MainWindow
+	systemTray *SystemTray
 }
 
 func NewApp() *LaunchdUIApp {
 	app := LaunchdUIApp{
-		app:        widgets.NewQApplication(len(os.Args), os.Args),
+		app: widgets.NewQApplication(len(os.Args), os.Args),
 	}
 	app.mainWindow = NewMainWindow(&app)
 	app.systemTray = NewSystemTray(&app)
 	return &app
 }
 
-func (lapp *LaunchdUIApp) Launch()  {
+func (lapp *LaunchdUIApp) Launch() {
 	lapp.mainWindow.Launch()
 	lapp.app.Exec()
 }
 
-func (lapp *LaunchdUIApp) Exit()  {
+func (lapp *LaunchdUIApp) Exit() {
 	lapp.app.Exit(0)
 }
 
@@ -36,7 +36,7 @@ func (lapp *LaunchdUIApp) AppDir() *core.QDir {
 
 func (lapp *LaunchdUIApp) AppRootDir() *core.QDir {
 	dir := lapp.AppDir()
-	dir.Cd("../../")
+	//dir.Cd("../../")
 	return dir
 }
 
