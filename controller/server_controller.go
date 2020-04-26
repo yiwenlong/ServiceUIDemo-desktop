@@ -1,15 +1,14 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/therecipe/qt/core"
+	"github.com/yiwenlong/launchduidemo/helper"
 	"github.com/yiwenlong/launchduidemo/shell"
 )
 
 type ServerController struct {
-	homeDir     *core.QDir
-	startScript string
-	stopScript  string
+	homeDir *core.QDir
+	mShell  shell.Shell
 }
 
 const (
@@ -20,20 +19,25 @@ const (
 func NewServerController(serverHomeDir *core.QDir) *ServerController {
 	sc := ServerController{
 		homeDir: serverHomeDir,
+		mShell:  shell.NewShell(),
 	}
-	startSh := serverHomeDir.AbsoluteFilePath("start.sh")
-	sc.startScript = fmt.Sprintf("%s %s", startSh, serverHomeDir.AbsolutePath())
-	stopSh := serverHomeDir.AbsoluteFilePath("stop.sh")
-	sc.stopScript = fmt.Sprintf("%s %s", stopSh, serverHomeDir.AbsolutePath())
 	return &sc
 }
 
 func (sc *ServerController) Start(handler shell.CommandHandler) {
-	shell.ExecShellAsync(sc.startScript, handler, Start)
+	executable := sc.homeDir.AbsoluteFilePath("server")
+	err := helper.ConfigServer(sc.homeDir.AbsolutePath(), executable)
+	if err != nil {
+		handler.HandleEcho(Start, "ERROR: "+err.Error())
+		return
+	}
+	startSh := sc.homeDir.AbsoluteFilePath("boot")
+	sc.mShell.ExecAsync(startSh, []string{sc.homeDir.AbsolutePath()}, handler, Start)
 }
 
 func (sc *ServerController) Stop(handler shell.CommandHandler) {
-	shell.ExecShellAsync(sc.stopScript, handler, Stop)
+	stopSh := sc.homeDir.AbsoluteFilePath("stop")
+	sc.mShell.ExecAsync(stopSh, []string{sc.homeDir.AbsolutePath()}, handler, Stop)
 }
 
 func (sc *ServerController) LogFile() *core.QFile {
@@ -49,6 +53,7 @@ func (sc *ServerController) Log() string {
 }
 
 func (sc *ServerController) IsStarted() bool {
-	state, _ := shell.ExecShell("launchctl list | grep \"com.1wenlong.server\"")
-	return state.Success()
+	// state, _ := shell.ExecShell("launchctl list | grep \"com.1wenlong.server\"")
+	// return state.Success()
+	return false
 }

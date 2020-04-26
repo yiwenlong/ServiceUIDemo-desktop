@@ -1,3 +1,4 @@
 @echo off
-start /b server > server.log 2>&1
+%1\service install
+%1\service start
 @echo "Server stared!"
