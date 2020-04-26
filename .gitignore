@@ -15,4 +15,5 @@
 # vendor/
 deploy
 moc*
-/windows/server.log
+/windows/*.log
+/windows/*.xml
