@@ -16,25 +16,27 @@ type CommandHandler interface {
 }
 
 type Shell interface {
-	Exec(script string) (*os.ProcessState, string)
+	Exec(script string, args []string) (*os.ProcessState, string)
 
-	ExecAsync(script string, handler CommandHandler, token SessionToken)
-
-	ExecAdminAsync(script string, handler CommandHandler, token SessionToken)
+	ExecAsync(script string, args []string, handler CommandHandler, token SessionToken)
 }
 
 type WindowsShell struct {
 }
 
-func (ws *WindowsShell) Exec(script string) (*os.ProcessState, string) {
-	cmd := exec.Command("cmd", "/c", script)
+func NewShell() Shell {
+	return &WindowsShell{}
+}
+
+func (ws *WindowsShell) Exec(script string, args []string) (*os.ProcessState, string) {
+	cmd := exec.Command(script, args...)
 	out, _ := cmd.Output()
 	cmd.Run()
 	return cmd.ProcessState, string(out)
 }
 
-func (ws *WindowsShell) ExecAsync(script string, handler CommandHandler, token SessionToken) {
-	cmd := exec.Command("cmd", "/c", script)
+func (ws *WindowsShell) ExecAsync(script string, args []string, handler CommandHandler, token SessionToken) {
+	cmd := exec.Command(script, args...)
 	out, _ := cmd.StdoutPipe()
 	ch := processOut(out)
 	cmd.Start()
