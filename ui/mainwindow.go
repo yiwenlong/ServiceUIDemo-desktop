@@ -15,7 +15,6 @@ type MainWindow struct {
 	btnStart      *widgets.QPushButton
 	btnClose      *widgets.QPushButton
 	btnShowLog    *widgets.QPushButton
-	servCtl       *controller.ServerController
 	dialog        *Dialog
 }
 
@@ -34,7 +33,6 @@ func NewMainWindow(app *LaunchdUIApp) *MainWindow {
 		btnStart:      widgets.NewQPushButton2("start launchd test server", nil),
 		btnClose:      widgets.NewQPushButton2("close launchd test server", nil),
 		btnShowLog:    widgets.NewQPushButton2("show log", nil),
-		servCtl:       controller.NewServerController(app.AppRootDir()),
 		dialog:        NewDialog(nil),
 	}
 	window.init()
@@ -50,12 +48,12 @@ func (mw *MainWindow) init() {
 	mw.window.SetCentralWidget(mw.centralWidget)
 
 	mw.btnStart.ConnectClicked(func(bool) {
-		mw.servCtl.Start(mw)
+		mw.app.serverCtl.Start()
 	})
 	mw.centralWidget.Layout().AddWidget(mw.btnStart)
 
 	mw.btnClose.ConnectClicked(func(bool) {
-		mw.servCtl.Stop(mw)
+		mw.app.serverCtl.Stop()
 	})
 	mw.centralWidget.Layout().AddWidget(mw.btnClose)
 

@@ -6,6 +6,17 @@ import (
 	"github.com/yiwenlong/launchduidemo/shell"
 )
 
+type IServerController interface {
+	IsStart() bool
+	Start()
+	Stop()
+	LogFilePath() string
+}
+
+func NewIServerController() *IServerController{
+	return nil
+}
+
 type ServerController struct {
 	homeDir *core.QDir
 	mShell  shell.Shell
@@ -15,14 +26,6 @@ const (
 	Start shell.SessionToken = iota
 	Stop
 )
-
-func NewServerController(serverHomeDir *core.QDir) *ServerController {
-	sc := ServerController{
-		homeDir: serverHomeDir,
-		mShell:  shell.NewShell(),
-	}
-	return &sc
-}
 
 func (sc *ServerController) Start(handler shell.CommandHandler) {
 	executable := sc.homeDir.AbsoluteFilePath("server")

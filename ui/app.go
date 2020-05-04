@@ -3,6 +3,7 @@ package ui
 import (
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
+	"github.com/yiwenlong/launchduidemo/controller"
 	"os"
 )
 
@@ -10,6 +11,7 @@ type LaunchdUIApp struct {
 	app        *widgets.QApplication
 	mainWindow *MainWindow
 	systemTray *SystemTray
+	serverCtl  *controller.IServerController
 }
 
 func NewApp() *LaunchdUIApp {
@@ -18,6 +20,7 @@ func NewApp() *LaunchdUIApp {
 	}
 	app.mainWindow = NewMainWindow(&app)
 	app.systemTray = NewSystemTray(&app)
+	app.serverCtl  = controller.NewIServerController()
 	return &app
 }
 
