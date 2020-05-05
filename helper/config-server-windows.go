@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-type Service struct {
+type WinswService struct {
 	XMLName          xml.Name `xml:"service"`
 	Id               string   `xml:"id"`
 	Name             string   `xml:"name"`
@@ -19,8 +19,8 @@ type Service struct {
 	Logmode          string   `xml:"logmode"`
 }
 
-func ConfigServer(homeDir, executable string, args ...string) error {
-	service := Service{
+func ConfigServerOnWindows(homeDir, executable string, args ...string) error {
+	service := WinswService{
 		Id:               "MyDemoServer",
 		Name:             "MyDemoServer",
 		Description:      "A demo service run on Windows operation system.",

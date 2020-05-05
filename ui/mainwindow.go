@@ -4,7 +4,7 @@ import (
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
 	"github.com/yiwenlong/launchduidemo/controller"
-	"github.com/yiwenlong/launchduidemo/shell"
+	"github.com/yiwenlong/launchduidemo/helper"
 )
 
 type MainWindow struct {
@@ -20,7 +20,6 @@ type MainWindow struct {
 
 type Dialog struct {
 	widgets.QMessageBox
-
 	_ func(message string) `slot:"info"`
 }
 
@@ -48,12 +47,12 @@ func (mw *MainWindow) init() {
 	mw.window.SetCentralWidget(mw.centralWidget)
 
 	mw.btnStart.ConnectClicked(func(bool) {
-		mw.app.serverCtl.Start()
+		mw.app.serverCtl.Start(mw)
 	})
 	mw.centralWidget.Layout().AddWidget(mw.btnStart)
 
 	mw.btnClose.ConnectClicked(func(bool) {
-		mw.app.serverCtl.Stop()
+		mw.app.serverCtl.Stop(mw)
 	})
 	mw.centralWidget.Layout().AddWidget(mw.btnClose)
 
@@ -61,34 +60,13 @@ func (mw *MainWindow) init() {
 	mw.centralWidget.Layout().AddWidget(mw.loggerWidget)
 
 	mw.dialog.ConnectInfo(func(message string) {
-		mw.dialog.Information(nil, "Infomation", message, widgets.QMessageBox__Ok, widgets.QMessageBox__Default)
+		mw.dialog.Information(nil, "Information", message, widgets.QMessageBox__Ok, widgets.QMessageBox__Default)
 	})
-}
-
-func (mw *MainWindow) HandleEcho(_ shell.SessionToken, echo string) {
-	mw.loggerWidget.Append(echo)
-}
-
-func (mw *MainWindow) HandleSuccess(token shell.SessionToken) {
-	switch token {
-	case controller.Start:
-		mw.app.app.SetQuitOnLastWindowClosed(false)
-		mw.app.LaunchSystemTray()
-		mw.dialog.Info("Service Started!")
-	case controller.Stop:
-		mw.app.app.SetQuitOnLastWindowClosed(true)
-		mw.app.CloseSystemTray()
-		mw.dialog.Info("Service Stop!")
-	}
-}
-
-func (mw *MainWindow) HandleError(_ shell.SessionToken, _ int, state string) {
-	mw.loggerWidget.Append("[ Shell exec error ]" + state)
 }
 
 func (mw *MainWindow) Launch() {
 	mw.Show()
-	if mw.servCtl.IsStarted() {
+	if mw.app.serverCtl.IsStart() {
 		mw.app.LaunchSystemTray()
 	}
 }
@@ -99,4 +77,26 @@ func (mw *MainWindow) Show() {
 
 func (mw *MainWindow) Close() {
 	mw.window.SetVisible(false)
+}
+
+//// MARK: Implement ProcessHandler Interface methods.
+func (mw *MainWindow) HandleEcho(_ helper.SessionToken, echo string) {
+	mw.loggerWidget.Append(echo)
+}
+
+func (mw *MainWindow) HandleSuccess(token helper.SessionToken) {
+	switch token {
+	case controller.SessionStart:
+		mw.app.app.SetQuitOnLastWindowClosed(false)
+		mw.app.LaunchSystemTray()
+		mw.dialog.Info("Service Started!")
+	case controller.SessionStop:
+		mw.app.app.SetQuitOnLastWindowClosed(true)
+		mw.app.CloseSystemTray()
+		mw.dialog.Info("Service SessionStop!")
+	}
+}
+
+func (mw *MainWindow) HandleError(_ helper.SessionToken, _ int, state string) {
+	mw.loggerWidget.Append("[ Shell exec error ]" + state)
 }

@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
 	"github.com/yiwenlong/launchduidemo/controller"
 	"os"
@@ -11,7 +10,7 @@ type LaunchdUIApp struct {
 	app        *widgets.QApplication
 	mainWindow *MainWindow
 	systemTray *SystemTray
-	serverCtl  *controller.IServerController
+	serverCtl  controller.IServerController
 }
 
 func NewApp() *LaunchdUIApp {
@@ -20,7 +19,7 @@ func NewApp() *LaunchdUIApp {
 	}
 	app.mainWindow = NewMainWindow(&app)
 	app.systemTray = NewSystemTray(&app)
-	app.serverCtl  = controller.NewIServerController()
+	app.serverCtl  = controller.NewIServerController(app.app.ApplicationDirPath())
 	return &app
 }
 
@@ -31,16 +30,6 @@ func (lapp *LaunchdUIApp) Launch() {
 
 func (lapp *LaunchdUIApp) Exit() {
 	lapp.app.Exit(0)
-}
-
-func (lapp *LaunchdUIApp) AppDir() *core.QDir {
-	return core.NewQDir2(lapp.app.ApplicationDirPath())
-}
-
-func (lapp *LaunchdUIApp) AppRootDir() *core.QDir {
-	dir := lapp.AppDir()
-	//dir.Cd("../../")
-	return dir
 }
 
 func (lapp *LaunchdUIApp) ShowMainWindow() {
