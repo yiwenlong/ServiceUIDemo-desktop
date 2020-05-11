@@ -14,8 +14,8 @@
       <string>myhomepath/server</string>
     </array>
     <key>StandardOutPath</key>
-    <string>myhomepath/info.log</string>
+    <string>myhomepath/server.log</string>
     <key>StandardErrorPath</key>
-    <string>myhomepath/error.log</string>
+    <string>myhomepath/server.log</string>
   </dict>
 </plist>

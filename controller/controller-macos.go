@@ -25,9 +25,10 @@ func (mctl *MacOSServerController) Start(handler helper.ProcessHandler) {
 }
 
 func (mctl *MacOSServerController) Stop(handler helper.ProcessHandler) {
-
+	startSh := filepath.Join(mctl.appRootDirPath, "stop")
+	helper.ExecShellAsync(startSh, handler, SessionStop)
 }
 
 func (mctl *MacOSServerController) LogFilePath() string {
-	return ""
+	return filepath.Join(mctl.appRootDirPath, "server.log")
 }
