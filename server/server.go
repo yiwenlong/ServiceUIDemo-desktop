@@ -13,7 +13,7 @@ var count int
 func Serv(address string) {
 	http.HandleFunc("/", handler)
 	http.HandleFunc("/count", counter)
-	log.Println("Start listening...")
+	log.Printf("Start listening on %s\n", address)
 	log.Fatal(http.ListenAndServe(address, nil))
 }
 
