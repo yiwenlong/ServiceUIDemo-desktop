@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/yiwenlong/launchduidemo/helper"
+	"runtime"
 )
 
 type IServerController interface {
@@ -11,15 +12,19 @@ type IServerController interface {
 	LogFilePath() string
 }
 
-func NewIServerController(appRootDirPath string) IServerController{
-	ctl := MacOSServerController{
-		appRootDirPath: appRootDirPath,
+func NewIServerController(appRootDirPath string) IServerController {
+	if runtime.GOARCH == "drawin" {
+		return &MacOSServerController{
+			appRootDirPath: appRootDirPath,
+		}
+	} else {
+		return &WindowsServerController{
+			appRootDirPath: appRootDirPath,
+		}
 	}
-	return &ctl
 }
 
 const (
 	SessionStart helper.SessionToken = iota
 	SessionStop
 )
-
