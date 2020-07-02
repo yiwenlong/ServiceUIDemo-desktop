@@ -19,7 +19,7 @@ func NewApp() *LaunchdUIApp {
 	}
 	app.mainWindow = NewMainWindow(&app)
 	app.systemTray = NewSystemTray(&app)
-	app.serverCtl  = controller.NewIServerController(app.app.ApplicationDirPath())
+	app.serverCtl = controller.NewServerController(app.app.ApplicationDirPath())
 	return &app
 }
 

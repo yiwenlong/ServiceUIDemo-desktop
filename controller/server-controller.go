@@ -12,7 +12,7 @@ type IServerController interface {
 	LogFilePath() string
 }
 
-func NewIServerController(appRootDirPath string) IServerController {
+func NewServerController(appRootDirPath string) IServerController {
 	if runtime.GOARCH == "drawin" {
 		return &MacOSServerController{
 			appRootDirPath: appRootDirPath,
