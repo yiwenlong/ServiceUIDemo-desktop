@@ -4,6 +4,7 @@ import (
 	"github.com/yiwenlong/launchduidemo/controller/config"
 	"github.com/yiwenlong/launchduidemo/helper"
 	"path/filepath"
+	"runtime"
 )
 
 type ServerController struct {
@@ -34,8 +35,20 @@ func (servCtl *ServerController) IsStart() bool {
 	return false
 }
 
-func NewServerController(appRootDirPath string) *ServerController {
-	return nil
+func NewServerController(home string) *ServerController {
+	var conf config.Helper
+	switch runtime.GOOS {
+	case "darwin":
+		conf = &config.DarwinConfig{}
+	case "windows":
+		conf = &config.WindowsConfig{}
+	default:
+		panic("Operation system not support: " + runtime.GOOS)
+	}
+	return &ServerController{
+		config:     conf,
+		serverHome: home,
+	}
 }
 
 const (

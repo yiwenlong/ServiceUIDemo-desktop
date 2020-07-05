@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
 	"github.com/yiwenlong/launchduidemo/controller"
 	"os"
@@ -19,8 +20,14 @@ func NewApp() *LaunchdUIApp {
 	}
 	app.mainWindow = NewMainWindow(&app)
 	app.systemTray = NewSystemTray(&app)
-	app.serverCtl = controller.NewServerController(app.app.ApplicationDirPath())
+	app.serverCtl = controller.NewServerController(app.HomePath())
 	return &app
+}
+
+func (lapp *LaunchdUIApp) HomePath() string {
+	dir := core.NewQDir2(lapp.app.ApplicationDirPath())
+	dir.Cd("../../")
+	return dir.CurrentPath()
 }
 
 func (lapp *LaunchdUIApp) Launch() {
