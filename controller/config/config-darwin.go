@@ -1,8 +1,10 @@
 package config
 
+import "errors"
+
 type DarwinConfig struct {
 }
 
 func (config *DarwinConfig) Config(homeDir, executable string, args ...string) error {
-	return nil
+	return errors.New("Drawin config not implement current.")
 }
