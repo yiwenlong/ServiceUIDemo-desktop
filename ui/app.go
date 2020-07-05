@@ -10,7 +10,7 @@ type LaunchdUIApp struct {
 	app        *widgets.QApplication
 	mainWindow *MainWindow
 	systemTray *SystemTray
-	serverCtl  controller.IServerController
+	serverCtl  *controller.ServerController
 }
 
 func NewApp() *LaunchdUIApp {

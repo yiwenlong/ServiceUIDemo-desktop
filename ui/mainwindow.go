@@ -79,12 +79,12 @@ func (mw *MainWindow) Close() {
 	mw.window.SetVisible(false)
 }
 
-//// MARK: Implement ProcessHandler Interface methods.
-func (mw *MainWindow) HandleEcho(_ helper.SessionToken, echo string) {
+//// MARK: Implement ProcessCallback Interface methods.
+func (mw *MainWindow) Echo(_ helper.SessionToken, echo string) {
 	mw.loggerWidget.Append(echo)
 }
 
-func (mw *MainWindow) HandleSuccess(token helper.SessionToken) {
+func (mw *MainWindow) OnSuccess(token helper.SessionToken) {
 	switch token {
 	case controller.SessionStart:
 		mw.app.app.SetQuitOnLastWindowClosed(false)
@@ -97,6 +97,6 @@ func (mw *MainWindow) HandleSuccess(token helper.SessionToken) {
 	}
 }
 
-func (mw *MainWindow) HandleError(_ helper.SessionToken, _ int, state string) {
+func (mw *MainWindow) OnError(_ helper.SessionToken, _ int, state string) {
 	mw.loggerWidget.Append("[ Shell exec error ]" + state)
 }

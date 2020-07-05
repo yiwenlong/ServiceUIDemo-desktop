@@ -1,4 +1,4 @@
-package helper
+package config
 
 // document: https://github.com/winsw/winsw
 
@@ -7,6 +7,9 @@ import (
 	"io/ioutil"
 	"path/filepath"
 )
+
+type WindowsConfig struct {
+}
 
 type WinswService struct {
 	XMLName          xml.Name `xml:"service"`
@@ -19,7 +22,7 @@ type WinswService struct {
 	Logmode          string   `xml:"logmode"`
 }
 
-func ConfigServerOnWindows(homeDir, executable string, args ...string) error {
+func (config *WindowsConfig) Config(homeDir, executable string, args ...string) error {
 	service := WinswService{
 		Id:               "MyDemoServer",
 		Name:             "MyDemoServer",

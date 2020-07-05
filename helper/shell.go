@@ -9,13 +9,12 @@ import (
 
 type SessionToken int
 
-type ProcessHandler interface {
+type ProcessCallback interface {
+	Echo(token SessionToken, echo string)
 
-	HandleEcho(token SessionToken, echo string)
+	OnError(token SessionToken, exitCode int, state string)
 
-	HandleError(token SessionToken, exitCode int, state string)
-
-	HandleSuccess(token SessionToken)
+	OnSuccess(token SessionToken)
 }
 
 func processOut(reader io.ReadCloser) chan string {
@@ -36,25 +35,25 @@ func processOut(reader io.ReadCloser) chan string {
 	return out
 }
 
-func ExecShellAdmin(s string, handler ProcessHandler, token SessionToken) {
+func ExecShellAdmin(s string, handler ProcessCallback, token SessionToken) {
 	script := fmt.Sprintf("osascript -e \"do shell script \\\"%s\\\" with administrator privileges\"", s)
 	ExecShellAsync(script, handler, token)
 }
 
-func ExecShellAsync(s string, handler ProcessHandler, token SessionToken) {
+func ExecShellAsync(s string, handler ProcessCallback, token SessionToken) {
 	cmd := exec.Command("/bin/bash", "-c", s+" 2>&1")
 	out, _ := cmd.StdoutPipe()
 	ch := processOut(out)
 	cmd.Start()
 	for echo := range ch {
-		handler.HandleEcho(token, echo)
+		handler.Echo(token, echo)
 	}
 	cmd.Wait()
 	state := cmd.ProcessState
 	if state.Success() {
-		handler.HandleSuccess(token)
+		handler.OnSuccess(token)
 	} else {
-		handler.HandleError(token, state.ExitCode(), state.String())
+		handler.OnError(token, state.ExitCode(), state.String())
 	}
 }
 
