@@ -27,7 +27,7 @@ func NewApp() *LaunchdUIApp {
 func (lapp *LaunchdUIApp) HomePath() string {
 	dir := core.NewQDir2(lapp.app.ApplicationDirPath())
 	dir.Cd("../../")
-	return dir.CurrentPath()
+	return dir.AbsolutePath()
 }
 
 func (lapp *LaunchdUIApp) Launch() {

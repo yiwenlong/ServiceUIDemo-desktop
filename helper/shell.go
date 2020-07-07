@@ -1,9 +1,7 @@
 package helper
 
 import (
-	"fmt"
 	"io"
-	"os"
 	"os/exec"
 )
 
@@ -35,20 +33,21 @@ func processOut(reader io.ReadCloser) chan string {
 	return out
 }
 
-func ExecShellAdmin(s string, handler ProcessCallback, token SessionToken) {
-	script := fmt.Sprintf("osascript -e \"do shell script \\\"%s\\\" with administrator privileges\"", s)
-	ExecShellAsync(script, handler, token)
-}
+// apple script
+//func ExecShellAdmin(s string, handler ProcessCallback, token SessionToken) {
+//	script := fmt.Sprintf("osascript -e \"do shell script \\\"%s\\\" with administrator privileges\"", s)
+//	ExecShellAsync(script, handler, token)
+//}
 
 func ExecShellAsync(s string, handler ProcessCallback, token SessionToken) {
 	cmd := exec.Command("/bin/bash", "-c", s+" 2>&1")
 	out, _ := cmd.StdoutPipe()
 	ch := processOut(out)
-	cmd.Start()
+	_ = cmd.Start()
 	for echo := range ch {
 		handler.Echo(token, echo)
 	}
-	cmd.Wait()
+	_ = cmd.Wait()
 	state := cmd.ProcessState
 	if state.Success() {
 		handler.OnSuccess(token)
@@ -57,9 +56,9 @@ func ExecShellAsync(s string, handler ProcessCallback, token SessionToken) {
 	}
 }
 
-func ExecShell(s string) (*os.ProcessState, string) {
-	cmd := exec.Command("/bin/bash", "-c", s+" 2>&1")
-	out, _ := cmd.Output()
-	cmd.Run()
-	return cmd.ProcessState, string(out)
-}
+//func ExecShell(s string) (*os.ProcessState, string) {
+//	cmd := exec.Command("/bin/bash", "-c", s+" 2>&1")
+//	out, _ := cmd.Output()
+//	cmd.Run()
+//	return cmd.ProcessState, string(out)
+//}

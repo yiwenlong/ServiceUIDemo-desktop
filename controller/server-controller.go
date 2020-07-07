@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/yiwenlong/launchduidemo/controller/config"
 	"github.com/yiwenlong/launchduidemo/helper"
 	"path/filepath"
@@ -18,7 +19,7 @@ func (servCtl *ServerController) Start(callback helper.ProcessCallback) {
 		return
 	}
 	startSh := filepath.Join(servCtl.serverHome, "boot")
-	helper.ExecShellAsync(startSh, callback, SessionStart)
+	helper.ExecShellAsync(fmt.Sprintf("%s %s", startSh, servCtl.serverHome), callback, SessionStart)
 }
 
 func (servCtl *ServerController) Stop(callback helper.ProcessCallback) {
