@@ -17,3 +17,4 @@ deploy
 moc*
 /windows/*.log
 /windows/*.xml
+rcc*

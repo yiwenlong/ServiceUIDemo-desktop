@@ -1,6 +1,9 @@
 package ui
 
-import "github.com/therecipe/qt/widgets"
+import (
+	"github.com/therecipe/qt/gui"
+	"github.com/therecipe/qt/widgets"
+)
 
 type SystemTray struct {
 	lapp			*LaunchdUIApp
@@ -19,7 +22,8 @@ func NewSystemTray(app * LaunchdUIApp) *SystemTray {
 }
 
 func (st *SystemTray) init() {
-	st.mSystemTrayIcon.SetIcon(widgets.NewQCommonStyle().StandardIcon(widgets.QStyle__SP_MessageBoxCritical, nil, nil))
+	icon := gui.NewQIcon5(":/qml/tray.png")
+	st.mSystemTrayIcon.SetIcon(icon)
 	st.menu.AddAction("Exit").ConnectTriggered(func(bool) {
 		st.lapp.Exit()
 	})
