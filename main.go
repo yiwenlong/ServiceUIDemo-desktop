@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/yiwenlong/launchduidemo/ui"
+	"github.com/yiwenlong/ServiceUIDemo-desktop/ui"
 )
 
 func main() {

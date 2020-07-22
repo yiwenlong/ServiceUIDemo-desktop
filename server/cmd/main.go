@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/yiwenlong/launchduidemo/server"
+	"github.com/yiwenlong/ServiceUIDemo-desktop/server"
 	"log"
 	"os"
 	"os/signal"

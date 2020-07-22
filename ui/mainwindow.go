@@ -3,8 +3,8 @@ package ui
 import (
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
-	"github.com/yiwenlong/launchduidemo/controller"
-	"github.com/yiwenlong/launchduidemo/helper"
+	"github.com/yiwenlong/ServiceUIDemo-desktop/controller"
+	"github.com/yiwenlong/ServiceUIDemo-desktop/helper"
 )
 
 type MainWindow struct {
@@ -29,8 +29,8 @@ func NewMainWindow(app *LaunchdUIApp) *MainWindow {
 		window:        widgets.NewQMainWindow(nil, 0),
 		centralWidget: widgets.NewQWidget(nil, 0),
 		loggerWidget:  widgets.NewQTextEdit(nil),
-		btnStart:      widgets.NewQPushButton2("start launchd test server", nil),
-		btnClose:      widgets.NewQPushButton2("close launchd test server", nil),
+		btnStart:      widgets.NewQPushButton2("start server", nil),
+		btnClose:      widgets.NewQPushButton2("stop server", nil),
 		btnShowLog:    widgets.NewQPushButton2("show log", nil),
 		dialog:        NewDialog(nil),
 	}
@@ -40,7 +40,7 @@ func NewMainWindow(app *LaunchdUIApp) *MainWindow {
 
 func (mw *MainWindow) init() {
 	mw.window.SetMinimumSize2(800, 400)
-	mw.window.SetWindowTitle("launchd demo")
+	mw.window.SetWindowTitle("Service UI Demo")
 
 	mw.centralWidget.SetLayout(widgets.NewQVBoxLayout())
 	mw.centralWidget.Layout().QLayoutItem.SetAlignment(core.Qt__AlignLeft)

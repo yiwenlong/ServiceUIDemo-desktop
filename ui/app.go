@@ -3,7 +3,7 @@ package ui
 import (
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
-	"github.com/yiwenlong/launchduidemo/controller"
+	"github.com/yiwenlong/ServiceUIDemo-desktop/controller"
 	"os"
 )
 

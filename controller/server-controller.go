@@ -2,8 +2,8 @@ package controller
 
 import (
 	"fmt"
-	"github.com/yiwenlong/launchduidemo/controller/config"
-	"github.com/yiwenlong/launchduidemo/helper"
+	"github.com/yiwenlong/ServiceUIDemo-desktop/controller/config"
+	"github.com/yiwenlong/ServiceUIDemo-desktop/helper"
 	"path/filepath"
 )
 
