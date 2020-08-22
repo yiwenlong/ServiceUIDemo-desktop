@@ -7,6 +7,35 @@ import (
 	"path/filepath"
 )
 
+type ServiceController interface {
+	Start() (chan string, error)
+	Stop() (chan string, error)
+	IsStart() bool
+	ShowLog()
+}
+
+type ServiceControllerImpl struct {
+	ServiceHome string
+	ProcessName string
+}
+
+func (sc *ServiceControllerImpl) Start() (chan string, error) {
+
+}
+
+func (sc *ServiceControllerImpl) Stop() (chan string, error) {
+
+}
+
+func (sc *ServiceControllerImpl) IsStart() bool {
+
+}
+
+func (sc *ServiceControllerImpl) ShowLog() bool {
+
+}
+
+
 type ServerController struct {
 	config     config.Helper
 	serverHome string
